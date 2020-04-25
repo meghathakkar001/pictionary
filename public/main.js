@@ -119,7 +119,8 @@ var draw = function(obj){
 };
 
 var drawLine = function(fromx, fromy, obj){
-	context.beginPath();
+    context.beginPath();
+    
 	console.log(obj.color);
 	context.strokeStyle = obj.color;
 		context.moveTo(fromx, fromy);
@@ -168,8 +169,8 @@ var pictionary = function() {
 	obj.color="black"
 
     $('.draw-buttons').on('click', 'button', function(){
-        obj.color = $(this).attr('value');
-        console.log(obj.color);
+        //obj.color = $(this).attr('value');
+        //console.log$('#colorPicker');
 
         if (obj.color === '0') {
             socket.emit('clear screen', user);
@@ -177,6 +178,8 @@ var pictionary = function() {
             return;
         };
     });
+ 
+    
 
     console.log('You are the drawer');
 
@@ -268,7 +271,7 @@ e.preventDefault();
         if (click == true && drawing == true && prev.x && prev.y) {
 			obj.position = {x: mousePosition.x,
                         y: mousePosition.y}
-			
+			obj.color=$('#colorPicker')[0].value;
             drawLine(prev.x, prev.y, obj);
             socket.emit('draw', obj);
 			prev.x=mousePosition.x;
