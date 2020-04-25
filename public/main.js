@@ -126,6 +126,30 @@ var stopDraw = function() {
     prev={};
 };
 
+var getCanvas = function() {
+	console.log("Received getCanvas, returning: "+context);
+	socket.emit('send canvas', {'drawerCanvas': document.getElementById('canvas').toDataURL()});
+};
+
+var initCanvas = function(obj){
+	console.log("Received init canvas" + obj);
+    loadCanvas(obj.drawerCanvas);
+    socket.emit('leave newguesser');
+};
+
+ var loadCanvas = function(dataURL) {
+        var canvas = document.getElementById('canvas');
+        var context = canvas.getContext('2d');
+
+        // load image from data url
+        var imageObj = new Image();
+        imageObj.onload = function() {
+          context.drawImage(this, 0, 0);
+        };
+
+        imageObj.src = dataURL;
+      };
+
 var pictionary = function() {
     clearScreen();
     click = true;
@@ -272,6 +296,8 @@ $(document).ready(function() {
     socket.on('correct answer', correctAnswer);
     socket.on('reset', reset);
     socket.on('clear screen', clearScreen);
+    socket.on('send canvas', getCanvas);
+	socket.on('init canvas', initCanvas);
 
 })
 ;

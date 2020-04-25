@@ -67,6 +67,11 @@ io.on('connection', function (socket) {
 
 			// additional users will join the 'guesser' room
 			socket.join('guesser');
+			socket.join('new guesser');
+			
+			console.log("sending request to send canvas");
+			
+			io.in('drawer').emit('send canvas');
 
 			// server submits the 'guesser' event to this user
 			io.in(socket.username).emit('guesser', socket.username);
@@ -81,6 +86,17 @@ io.on('connection', function (socket) {
 	// submit drawing on canvas to other clients
 	socket.on('draw', function(obj) {
 		socket.broadcast.emit('draw', obj);
+	});
+
+	// submit drawing on canvas to other clients
+	socket.in('drawer').on('send canvas', function(obj) {
+		console.log('Canvas received:');
+		io.in('new guesser').emit('init canvas',obj);
+	});
+
+	//once first time canvas is loaded leave the new guesser group
+	socket.on('leave newguesser', function(){
+		socket.leave('new guesser');
 	});
 
 	// submit drawing on canvas to other clients
@@ -139,7 +155,8 @@ io.on('connection', function (socket) {
 		console.log('new drawer emit: ' + name);
 
 		// submit 'drawer' event to the same user
-		socket.emit('drawer', name);
+		io.in('drawer').emit('drawer', socket.username);
+		//socket.emit('drawer', name);
 		
 		// send a random word to the user connected to 'drawer' room
 		io.in('drawer').emit('draw word', newWord());
@@ -154,7 +171,8 @@ io.on('connection', function (socket) {
 		socket.join('guesser');
 
 		// submit 'guesser' event to this user
-		socket.emit('guesser', socket.username);
+		io.in(socket.username).emit('guesser', socket.username)
+		//socket.emit('guesser', socket.username);
 
 		//submit 'new drawer' to target so that it can be added to drawer room
 		io.in(data.to).emit('new drawer', data.to);
