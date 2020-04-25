@@ -67,13 +67,14 @@ var guessword = function(data){
 	} else {
 		$('#guesses').val(data.username + "'s guess: " + data.guessword);
 	}
-
+	$('#guesses').scrollTop($('#guesses')[0].scrollHeight);
     if (click == true && data.guessword.toString().toLowerCase() == $('span.word').text().toLowerCase() ) {
         console.log('guesser: ' + data.username + ' draw-word: ' + $('span.word').text());
         socket.emit('correct answer', {username: data.username, guessword: data.guessword});
         socket.emit('swap rooms', {from: user, to: data.username});
         click = false;
     }
+	
 };
 
 var drawWord = function(word) {
@@ -130,6 +131,10 @@ var drawLine = function(fromx, fromy, obj){
 var stopDraw = function() {
     prev={};
 };
+
+var whoisdrawing = function(name) {
+	$('span.drawername').text(name);
+}
 
 var getCanvas = function() {
 	console.log("Received getCanvas, returning: "+context);
@@ -305,6 +310,7 @@ $(document).ready(function() {
     socket.on('clear screen', clearScreen);
     socket.on('send canvas', getCanvas);
 	socket.on('init canvas', initCanvas);
+	socket.on('whoisdrawing',whoisdrawing);
 
 })
 ;

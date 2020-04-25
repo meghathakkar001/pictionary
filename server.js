@@ -32,8 +32,9 @@ function newWord() {
 };
 
 var wordcount;
-
+var whoisdrawing;
 io.on('connection', function (socket) {
+	
 	io.emit('userlist', users);
 
 	socket.on('join', function(name) {
@@ -59,6 +60,7 @@ io.on('connection', function (socket) {
 			// send the random word to the user inside the 'drawer' room
 			io.in(socket.username).emit('draw word', newWord());
 		//	console.log(socket.username + "'s draw word (join event): " + newWord());
+			whoisdrawing = name;
 		} 
 
 		// if there are more than one names in users 
@@ -80,6 +82,7 @@ io.on('connection', function (socket) {
 	
 		// update all clients with the list of users
 		io.emit('userlist', users);
+		io.emit('whoisdrawing', whoisdrawing);
 		
 	});
 
@@ -160,6 +163,7 @@ io.on('connection', function (socket) {
 		
 		// send a random word to the user connected to 'drawer' room
 		io.in('drawer').emit('draw word', newWord());
+		io.emit('whoisdrawing', name);
 	
 	});
 
