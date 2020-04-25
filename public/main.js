@@ -177,7 +177,7 @@ var pictionary = function() {
         //obj.color = $(this).attr('value');
         //console.log$('#colorPicker');
 
-        if (obj.color === '0') {
+        if (click === true) {
             socket.emit('clear screen', user);
             context.fillStyle = 'white';
             return;
@@ -266,6 +266,7 @@ e.preventDefault();
           y: evt.clientY - rect.top
         }};
 
+        var lastEmit = $.now();
     canvas.on('mousemove', function(event) {
         //var offset = canvas.offset();
         //obj.position = {x: event.pageX - offset.left,
@@ -273,10 +274,11 @@ e.preventDefault();
         
 			
 		var mousePosition=getMousePos(canvas,event);
-        if (click == true && drawing == true && prev.x && prev.y) {
+        if (click == true && drawing == true && prev.x && prev.y && ($.now() - lastEmit) > 100) {
 			obj.position = {x: mousePosition.x,
                         y: mousePosition.y}
-			obj.color=$('#colorPicker')[0].value;
+            obj.color=$('#colorPicker')[0].value;
+        
             drawLine(prev.x, prev.y, obj);
             socket.emit('draw', obj);
 			prev.x=mousePosition.x;
