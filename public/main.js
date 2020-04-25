@@ -62,9 +62,13 @@ var guesser = function() {
 };
 
 var guessword = function(data){
-    $('#guesses').text(data.username + "'s guess: " + data.guessword);
+    if($('#guesses').val()!='') {
+		$('#guesses').val($('#guesses').val()+'\n'+data.username + "'s guess: " + data.guessword);
+	} else {
+		$('#guesses').val(data.username + "'s guess: " + data.guessword);
+	}
 
-    if (click == true && data.guessword == $('span.word').text() ) {
+    if (click == true && data.guessword.toString().toLowerCase() == $('span.word').text().toLowerCase() ) {
         console.log('guesser: ' + data.username + ' draw-word: ' + $('span.word').text());
         socket.emit('correct answer', {username: data.username, guessword: data.guessword});
         socket.emit('swap rooms', {from: user, to: data.username});
