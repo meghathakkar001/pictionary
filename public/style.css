@@ -80,7 +80,10 @@ ul>li {
 #guesses {
     font-style: italic;
     font-size: 16px;
-    height: 28px;
+	text-align:left;
+    width: 100%;
+	height: 205px;
+	resize: none;
 }
 
 button {
