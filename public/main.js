@@ -62,18 +62,16 @@ var guesser = function() {
 };
 
 var guessword = function(data){
-    if($('#guesses').val()!='') {
-		$('#guesses').val($('#guesses').val()+'\n'+data.username + "'s guess: " + data.guessword);
+    if($('#guesses').html()!='') {
+		$('#guesses').html($('#guesses').html()+'<p><b>'+data.username + "'s guess:</b> " + data.guessword);
 	} else {
-		$('#guesses').val(data.username + "'s guess: " + data.guessword);
-	}
-	$('#guesses').scrollTop($('#guesses')[0].scrollHeight);
-    if (click == true && data.guessword.toString().toLowerCase() == $('span.word').text().toLowerCase() ) {
-        console.log('guesser: ' + data.username + ' draw-word: ' + $('span.word').text());
-        socket.emit('correct answer', {username: data.username, guessword: data.guessword});
-        socket.emit('swap rooms', {from: user, to: data.username});
-        click = false;
+		$('#guesses').html('<p><b>'+data.username + "'s guess:</b> "  + data.guessword);
     }
+    var container = $('#guesses')[0];
+    var containerHeight = container.clientHeight;
+    var contentHeight = container.scrollHeight;
+    container.scrollTop = contentHeight - containerHeight;
+    
 	
 };
 
@@ -88,7 +86,7 @@ var userlist = function(names) {
     users = names;
     var html = '<p class="chatbox-header">' + 'Players' + '</p>';
     for (var i = 0; i < names.length; i++) {
-        html += '<li>' + names[i] + '</li>';
+        html += '<li>' + names[i].name + '</li>';
     };
     $('ul').html(html);
 };
@@ -100,7 +98,16 @@ var newDrawer = function() {
 };
 
 var correctAnswer = function(data) {
-    $('#guesses').html('<p>' + data.username + ' guessed correctly!' + '</p>');
+   
+    if($('#guesses').html()!='') {
+		$('#guesses').html($('#guesses').html()+'<p style="color:blue;"><b>'+data.username + ' guessed correctly!</b></p>');
+	} else {
+		$('#guesses').html('<p style="color:blue;"><b>' +data.username + ' guessed correctly!</b></p>');
+    }
+    var container = $('#guesses')[0];
+    var containerHeight = container.clientHeight;
+    var contentHeight = container.scrollHeight;
+    container.scrollTop = contentHeight - containerHeight;
 };
 
 var reset = function(name) {

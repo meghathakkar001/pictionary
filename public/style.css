@@ -54,10 +54,15 @@ ul>p {
     margin: 10px 0;
 }
 
-#guesses>p {
-    margin: 1px 0;
-    padding: 2px;
+div.chat {
+    width: 100%;
+	height: 140px;
+    border: 1px solid #ccc;
+    padding: 0px;
+    overflow-y:auto;    
+    overflow-x:auto;
 }
+div.chat>p { margin:0 }
 
 ul>li {
     width: 40%;

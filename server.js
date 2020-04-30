@@ -9,6 +9,9 @@ var server = http.Server(app);
 var io = socket_io(server);
 
 var users = [];
+var currentWord;
+var game = initGame();
+
 
 var words = [
     "word", "letter", "number", "person", "pen", "police", "people",
@@ -18,17 +21,24 @@ var words = [
     "big foot", "sister", "world", "head", "page", "country", "question",
     "shiba inu", "school", "plant", "food", "sun", "state", "eye", "city", "tree",
     "farm", "story", "sea", "night", "day", "life", "north", "south", "east",
-    "west", "child", "children", "example", "paper", "music", "river", "car",
-    "Power Rangers", "feet", "book", "science", "room", "friend", "idea", "fish",
+    "west", "child", "children", "example", "paper", "music", "river", "car", "feet", "book", "science", "room", "friend", "idea", "fish",
     "mountain", "horse", "watch", "color", "face", "wood", "list", "bird",
     "body", "fart", "family", "song", "door", "forest", "wind", "ship", "area",
     "rock", "Captain Planet", "fire", "problem", "airplane", "top", "bottom", "king",
-    "space", "whale", "unicorn", "narwhal", "furniture", "sunset", "sunburn", "Grumpy cat", "feather", "pigeon"
+	"space", "whale", "unicorn", "narwhal", "furniture", "sunset", "sunburn", "feather", "pigeon",
+	"Angel","Eyeball","Pizza","Angry","Fireworks","Pumpkin","Baby","Flower","Rainbow","Beard","Flying saucer","Recycle","Bible","Giraffe","Sand castle","Bikini","Glasses","Snowflake","Book","High heel","Stairs","Bucket","Ice cream cone","Starfish","Bumble bee","Igloo","Strawberry","Butterfly","Lady bug","Sun","Camera","Lamp","Tire","Cat","Lion","Toast","Church","Mailbox","Toothbrush","Crayon","Night","Toothpaste","Dolphin","Nose","Truck","Egg","Olympics","Volleyball","Eiffel Tower","Peanut"
 ];
+
+function initGame(){
+	{
+		
+	}
+}
 
 function newWord() {
 	wordcount = Math.floor(Math.random() * (words.length));
-	return words[wordcount];
+	currentWord= words[wordcount];
+	return currentWord;
 };
 
 var wordcount;
@@ -45,7 +55,7 @@ io.on('connection', function (socket) {
 		console.log(socket.username + ' has joined. ID: ' + socket.id);
 
 		// save the name of the user to an array called users
-		users.push(socket.username);
+		users.push({name: socket.username});
 
 		// if the user is first to join OR 'drawer' room has no connections
 		if (users.length == 1 || typeof io.sockets.adapter.rooms['drawer'] === 'undefined') {
@@ -110,15 +120,25 @@ io.on('connection', function (socket) {
 
 	// submit each client's guesses to all clients
 	socket.on('guessword', function(data) {
-		io.emit('guessword', { username: data.username, guessword: data.guessword})
+		var guessToPrint=data.guessword;
 		console.log('guessword event triggered on server from: ' + data.username + ' with word: ' + data.guessword);
+
+		if (currentWord.toString().toLowerCase() === data.guessword.toString().toLowerCase() ) {
+			console.log('guesser: ' + data.username + ' draw-word: ' + data.guessword.toString());
+			io.emit('correct answer', {username: data.username});
+			
+			//socket.emit('swap rooms', {from: user, to: data.username});
+		}else{
+
+			io.emit('guessword', { username: data.username, guessword: guessToPrint})
+		}
 	});
 
 	socket.on('disconnect', function() {
 		for (var i = 0; i < users.length; i++) {
 
 			// remove user from users list
-			if (users[i] == socket.username) {
+			if (users[i].name == socket.username) {
 				users.splice(i, 1);
 			};
 		};
@@ -141,10 +161,10 @@ io.on('connection', function (socket) {
 			
 			// generate random number based on length of users list
 			var x = Math.floor(Math.random() * (users.length));
-			console.log(users[x]);
+			console.log(users[x].name);
 
 			// submit new drawer event to the random user in userslist
-			io.in(users[x]).emit('new drawer', users[x]);
+			io.in(users[x].name).emit('new drawer', users[x].name);
 		};
 	});
 
@@ -186,11 +206,6 @@ io.on('connection', function (socket) {
 	
 		io.emit('reset', data.to);
 
-	});
-
-	socket.on('correct answer', function(data) {
-		io.emit('correct answer', data);
-		console.log(data.username + ' guessed correctly with ' + data.guessword);
 	});
 
 	socket.on('clear screen', function(name) {
