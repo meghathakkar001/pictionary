@@ -20,7 +20,7 @@ function initGame(drawerName) {
 	{
 		for (var i = 0; i < users.length; i++) {
 			users[i].score = 0;
-			if (!username === drawerName) {
+			if (!users[i].name === drawerName) {
 				currentGuessers.push(user.name);
 			}
 
@@ -222,9 +222,17 @@ io.on('connection', function (socket) {
 			let everyoneGuessed = game.guessedCorrectly(data.username);
 			console.log('Drawer is '+game.getDrawer());
 
+			let oldDrawer=game.getDrawer();
 			if (everyoneGuessed) {
+				nextDrawer= game.nextDrawer();
+				if(nextDrawer!=null){
+				swapRooms({ from: oldDrawer, to: nextDrawer });
+				}else{
+					//TODO: emit that new game is starting, display current scores
+					game = initGame(users[0].name);
+					swapRooms({ from: oldDrawer, to: game.getDrawer() });
 
-				swapRooms({ from: game.getDrawer(), to: game.nextDrawer() });
+				}
 			}
 
 			//socket.emit('swap rooms', {from: user, to: data.username});
