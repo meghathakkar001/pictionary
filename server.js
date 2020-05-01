@@ -10,10 +10,11 @@ var io = socket_io(server);
 
 var users = [];
 var currentWord;
+var countdown = 10;
 var game = initGame();
 
 function initGame(drawerName) {
-
+	
 	var drawer = drawerName;
 	var currentGuessers = [];
 	let usersAlreadyDrawn = [];
@@ -30,6 +31,7 @@ function initGame(drawerName) {
 		console.log("addDrawer called with: %s", drawerName);
 		drawer = drawerName;
 		usersAlreadyDrawn.push(drawerName);
+		resetTimer();
 	}
 	nextDrawer = function () {
 		let drawerName = null;
@@ -104,6 +106,30 @@ function initGame(drawerName) {
 
 
 }
+
+
+function resetTimer() {
+	countdown=10;
+}
+setInterval(function() {
+	if(countdown==0) {
+			console.log("inside timer about to swap rooms");
+			let oldDrawer=game.getDrawer();
+			let nextDrawer= game.nextDrawer();
+			if(nextDrawer!=null){
+				
+				swapRooms({ from: oldDrawer, to: nextDrawer });
+				}else{
+					//TODO: emit that new game is starting, display current scores
+					game = initGame(users[0].name);
+					swapRooms({ from: oldDrawer, to: game.getDrawer() });
+
+				}
+		} else {
+			countdown--;
+		  	io.emit('timer', { countdown: countdown });
+		}
+}, 1000);
 
 
 var words = [
@@ -347,7 +373,8 @@ io.on('connection', function (socket) {
 		io.in(data.to).emit('draw word', newWord());
 
 		io.emit('reset', data.to);
-
+		resetTimer();
+		
 	}
 
 })

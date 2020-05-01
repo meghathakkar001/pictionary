@@ -319,7 +319,11 @@ $(document).ready(function() {
     socket.on('clear screen', clearScreen);
     socket.on('send canvas', getCanvas);
 	socket.on('init canvas', initCanvas);
-	socket.on('whoisdrawing',whoisdrawing);
+    socket.on('whoisdrawing',whoisdrawing);
+    socket.on('timer', function (data) {
+        $('#counter').html(data.countdown);
+    });
+    
 
 })
 ;
