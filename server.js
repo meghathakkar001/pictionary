@@ -10,10 +10,12 @@ var io = socket_io(server);
 
 var users = [];
 var currentWord;
-var countdown = 10;
+var countdown;
 var game = initGame();
 
 function initGame(drawerName) {
+	const rounds=3;
+	var currentRound=1;
 	
 	var drawer = drawerName;
 	var currentGuessers = [];
@@ -39,11 +41,11 @@ function initGame(drawerName) {
 		console.log('Already drawn: ' + JSON.stringify(usersAlreadyDrawn, null, 2));
 		for (var i = 0; i < users.length; i++) {
 			let select = true;
-			console.log("Trying out user: " + users[i].name);
+			//console.log("Trying out user: " + users[i].name);
 			for (var j = 0; j < usersAlreadyDrawn.length; j++) {
-				console.log('comparing users i %j %j j %j %j', i, users[i].name, j, usersAlreadyDrawn[j]);
+				//console.log('comparing users i %j %j j %j %j', i, users[i].name, j, usersAlreadyDrawn[j]);
 				if (usersAlreadyDrawn[j] === users[i].name) {
-					console.log("Found user " + users[i].name);
+					//console.log("Found user " + users[i].name);
 					select = false;
 					break;
 				}
@@ -53,6 +55,13 @@ function initGame(drawerName) {
 				break;
 			}
 		}
+		if((drawerName==null) && currentRound < rounds && users.length >=1){			
+			
+			console.log("Starting round: " + currentRound);
+			currentRound++;
+			drawerName = users[0].name;
+			usersAlreadyDrawn = [];
+		}		
 		drawer = drawerName;
 		console.log("Final drawer: " + drawerName);
 		updateGuessers();
@@ -64,6 +73,8 @@ function initGame(drawerName) {
 
 	guessedCorrectly = function (username) {
 		console.log("%s guessed from current guessers: %s",username, JSON.stringify(getGuessers(),null,2));
+		
+
 		for (var j = 0; j < currentGuessers.length; j++) {
 			if (currentGuessers[j] === username) {
 				currentGuessers.splice(j, 1);
@@ -109,15 +120,19 @@ function initGame(drawerName) {
 
 
 function resetTimer() {
-	countdown=10;
+	countdown=60;
 }
+
+function calculateScore(){
+	return Math.round(100*countdown/60);
+}
+
 setInterval(function() {
 	if(countdown==0) {
 			console.log("inside timer about to swap rooms");
 			let oldDrawer=game.getDrawer();
 			let nextDrawer= game.nextDrawer();
 			if(nextDrawer!=null){
-				
 				swapRooms({ from: oldDrawer, to: nextDrawer });
 				}else{
 					//TODO: emit that new game is starting, display current scores
@@ -170,7 +185,7 @@ io.on('connection', function (socket) {
 		// save the name of the user to an array called users
 		users.push({ name: socket.username, score: 0 });
 
-
+		
 		// if the user is first to join OR 'drawer' room has no connections
 		if (users.length == 1 || typeof io.sockets.adapter.rooms['drawer'] === 'undefined') {
 
@@ -210,7 +225,7 @@ io.on('connection', function (socket) {
 
 		// update all clients with the list of users
 		io.emit('userlist', users);
-		io.emit('whoisdrawing', whoisdrawing);
+		io.in(socket.username).emit('whoisdrawing', whoisdrawing);
 
 	});
 
@@ -232,7 +247,7 @@ io.on('connection', function (socket) {
 
 	// submit drawing on canvas to other clients
 	socket.on('stopDraw', function (obj) {
-		console.log('stop draw received and now emiting to all')
+		//console.log('stop draw received and now emiting to all')
 		socket.broadcast.emit('stopDraw');
 	});
 
@@ -243,9 +258,18 @@ io.on('connection', function (socket) {
 
 		if (currentWord.toString().toLowerCase() === data.guessword.toString().toLowerCase()) {
 			console.log('guesser: ' + data.username + ' draw-word: ' + data.guessword.toString());
-			io.emit('correct answer', { username: data.username });
+			
 
 			let everyoneGuessed = game.guessedCorrectly(data.username);
+
+			
+			var correctGuesserIndex = users.findIndex((correctGuesser => correctGuesser.name == data.username));
+			let increment=calculateScore();
+			users[correctGuesserIndex].score +=increment;
+
+			var correctGuessorWithScore = users.find(correctGuesser => correctGuesser.name == data.username);
+			io.emit('correct answer', { username: data.username, score: correctGuessorWithScore.score, increment: increment });
+
 			console.log('Drawer is '+game.getDrawer());
 
 			let oldDrawer=game.getDrawer();
@@ -256,6 +280,7 @@ io.on('connection', function (socket) {
 				}else{
 					//TODO: emit that new game is starting, display current scores
 					game = initGame(users[0].name);
+					io.emit('userlist',users);
 					swapRooms({ from: oldDrawer, to: game.getDrawer() });
 
 				}
@@ -298,51 +323,33 @@ io.on('connection', function (socket) {
 
 			let nextDrawer = game.nextDrawer();
 			// submit new drawer event to the random user in userslist
-			io.in(nextDrawer).emit('new drawer', nextDrawer);
+			newDrawer(nextDrawer);
 		};
 	});
 
-	socket.on('new drawer', function (name) {
-
-		// remove user from 'guesser' room
-		socket.leave('guesser');
-
-		// place user into 'drawer' room
-		socket.join('drawer');
-		game.addDrawer(name);
+	newDrawer= function(username) {
+		var socketList = io.sockets.sockets;
+		for (var socketId in socketList) {
+			var socket = socketList[socketId];
+			//console.log("Socket is %s", socket.username);
+			if(socket.username === username){
+				socket.leave('guesser');
+				socket.join('drawer');
+			}
+		}
+		game.addDrawer(username);
 		console.log('Drawer is '+game.getDrawer());
-		console.log('new drawer emit: ' + name);
+		console.log('new drawer emit: ' + username);
 
 		// submit 'drawer' event to the same user
-		io.in('drawer').emit('drawer', socket.username);
-		//socket.emit('drawer', name);
+		io.in('drawer').emit('drawer', username);
 
 		// send a random word to the user connected to 'drawer' room
 		io.in('drawer').emit('draw word', newWord());
-		io.emit('whoisdrawing', name);
+		io.emit('whoisdrawing', username);
+		resetTimer();
 
-	});
-
-	// initiated from drawer's 'dblclick' event in Player list
-	socket.on('swap rooms', function (data) {
-
-		// drawer leaves 'drawer' room and joins 'guesser' room
-		socket.leave('drawer');
-		socket.join('guesser');
-
-		// submit 'guesser' event to this user
-		io.in(socket.username).emit('guesser', socket.username)
-		//socket.emit('guesser', socket.username);
-
-		//submit 'new drawer' to target so that it can be added to drawer room
-		io.in(data.to).emit('new drawer', data.to);
-
-		// submit random word to new user drawer
-		io.in(data.to).emit('draw word', newWord());
-
-		io.emit('reset', data.to);
-
-	});
+	};
 
 	socket.on('clear screen', function (name) {
 		io.emit('clear screen', name);
@@ -355,7 +362,7 @@ io.on('connection', function (socket) {
 		var socketList = io.sockets.sockets;
 		for (var socketId in socketList) {
 			var socket = socketList[socketId];
-			console.log("Socket is %s", socket.username);
+			//console.log("Socket is %s", socket.username);
 			if(socket.username === data.from){
 				socket.leave('drawer');
 				socket.join('guesser');
@@ -367,13 +374,7 @@ io.on('connection', function (socket) {
 		//socket.emit('guesser', socket.username);
 
 		//submit 'new drawer' to target so that it can be added to drawer room
-		io.in(data.to).emit('new drawer', data.to);
-
-		// submit random word to new user drawer
-		io.in(data.to).emit('draw word', newWord());
-
-		io.emit('reset', data.to);
-		resetTimer();
+		newDrawer(data.to);
 		
 	}
 
