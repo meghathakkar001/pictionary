@@ -49,9 +49,8 @@ iframe {
     margin-left: 7px;
 }
 
-ul {
+.users>ul {
     list-style-type: none;
-    text-align: left;
     font-size: 15px;
     padding: 3px;
     margin: 0 0;
@@ -59,7 +58,7 @@ ul {
 
 }
 
-ul>p {
+.users>ul>p {
     font-weight: bold;
     margin: 10px 0;
 }
@@ -74,10 +73,9 @@ div.chat {
 }
 div.chat>p { margin:0 }
 
-ul>li {
+.users>ul>li {
     width: 40%;
-    display: inline-block;
-    left-margin: -15px;
+    display: block;
     margin-left: 5px;
     margin-bottom: 5px;
     word-wrap: break-word;
@@ -212,13 +210,23 @@ canvas {
 .user, .banner {
     position: relative;
     background-color: white;
-    max-height: 300px;
-    max-width: 300px;
     text-align: center;
     padding: 25px 5px;
     top: 20%;
     margin: auto;
     border-radius: 6px;
+}
+.user{
+    
+    max-height: 300px;
+    max-width: 300px;
+}
+.banner{
+    
+    max-height: 600px;
+    max-width: 400px;
+
+
 }
 
 #username {
@@ -226,6 +234,31 @@ canvas {
     font-size: 30px;
     padding: 5px;
     margin: 10px;
+}
+
+.banner-title{
+    width: 90%;
+    font-size: 20px;
+    font-weight: bold;
+    padding: 5px;
+    margin: 10px;
+    background-color: #66CDAA;
+
+}
+
+
+
+.banner-body{
+    width: 90%;
+    font-size: 20px;
+    padding: 5px;
+    margin: 10px;
+
+
+}
+.banner-body>ul>li{
+    list-style: none; 
+    padding: 0;
 }
 
 #submitname {

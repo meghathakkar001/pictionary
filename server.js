@@ -151,7 +151,7 @@ var drawingInterval=setDrawingInterval();
 handleBanner=function(){
 	let bannerdata={
 		users: users,
-		bannerTitle: "Final Scores\n, Starting new round in 10 seconds",
+		bannerTitle: "Game Over. Final Scores:",
 		bannerCountDown: "10"
 	}
 	clearInterval(drawingInterval);
@@ -231,7 +231,7 @@ io.on('connection', function (socket) {
 			// additional users will join the 'guesser' room
 			socket.join('guesser');
 			socket.join('new guesser');
-			io.in(socket.username).emit('guess word', drawWord.replace(/\D/g,"*"));
+			io.in(socket.username).emit('guess word', drawWord.replace(/\S/g,"*"));
 			game.updateGuessers();
 
 

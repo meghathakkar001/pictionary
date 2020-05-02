@@ -89,9 +89,13 @@ var userlist = function (names) {
     var html = '<p class="chatbox-header">' + 'Players' + '</p>';
     for (var i = 0; i < names.length; i++) {
         users.push(names[i].name)
-        html += '<li id="' + names[i].name + '">' + names[i].name + ':' + names[i].score + '</li>';
+        if(user===names[i].name){
+            html += '<li style="color: blue" id="' + names[i].name + '"><b>' + names[i].name + ':' + names[i].score + '</b></li>';
+        }else{
+             html += '<li id="' + names[i].name + '">' + names[i].name + ':' + names[i].score + '</li>';
+        }
     };
-    $('ul').html(html);
+    $('.users > ul').html(html);
 };
 
 
@@ -142,10 +146,11 @@ var showBanner = function (bannerData) {
 
     $('.banner-title').html(bannerTitle);
     bannerUsers.sort(function(a, b){return b.score - a.score});
-    let html="";
+    let html="<ul>";
     for (var i = 0; i < bannerUsers.length; i++) {
-        html += '<li id="' + bannerUsers[i].name + '">' + bannerUsers[i].name + ':' + bannerUsers[i].score + '</li>';
+        html += '<li id="' + bannerUsers[i].name + '"><b>' + bannerUsers[i].name + ':</b>' + bannerUsers[i].score + '</li>';
     };
+    html+="</ul>";
     $('.banner-body').html(html);
     $('.banner-grey-out').fadeIn(200);
     $('.banner').fadeIn(200);
