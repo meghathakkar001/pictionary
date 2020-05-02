@@ -90,7 +90,7 @@ var userlist = function (names) {
     for (var i = 0; i < names.length; i++) {
         users.push(names[i].name)
         if(user===names[i].name){
-            html += '<li style="color: blue" id="' + names[i].name + '"><b>' + names[i].name + ':' + names[i].score + '</b></li>';
+            html += '<li style="color: blue; font-weight: bold" id="' + names[i].name + '">' + names[i].name + ':' + names[i].score + '</li>';
         }else{
              html += '<li id="' + names[i].name + '">' + names[i].name + ':' + names[i].score + '</li>';
         }
@@ -148,7 +148,7 @@ var showBanner = function (bannerData) {
     bannerUsers.sort(function(a, b){return b.score - a.score});
     let html="<ul>";
     for (var i = 0; i < bannerUsers.length; i++) {
-        html += '<li id="' + bannerUsers[i].name + '"><b>' + bannerUsers[i].name + ':</b>' + bannerUsers[i].score + '</li>';
+        html += '<li id="banner-' + bannerUsers[i].name + '"><b>' + bannerUsers[i].name + ':</b>' + bannerUsers[i].score + '</li>';
     };
     html+="</ul>";
     $('.banner-body').html(html);

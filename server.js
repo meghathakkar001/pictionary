@@ -14,7 +14,7 @@ var countdown;
 var game = initGame();
 
 function initGame(drawerName) {
-	const rounds=1;
+	const rounds=3;
 	var currentRound=1;
 	
 	var drawer = drawerName;
@@ -290,7 +290,7 @@ io.on('connection', function (socket) {
 
 			var correctGuessorWithScore = users.find(correctGuesser => correctGuesser.name == data.username);
 			io.emit('correct answer', { username: data.username, score: correctGuessorWithScore.score, increment: increment });
-
+			
 			console.log('Drawer is '+game.getDrawer());
 
 			let oldDrawer=game.getDrawer();
