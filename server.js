@@ -367,7 +367,7 @@ io.on('connection', function (socket) {
 		drawWord = newWord()
 		// send a random word to the user connected to 'drawer' room
 		io.in('drawer').emit('draw word', drawWord);
-		io.in('guesser').emit('guess word', drawWord.replace(/\D/g,"*"));
+		io.in('guesser').emit('guess word', drawWord.replace(/\S/g,"*"));
 		io.emit('whoisdrawing', username);
 		resetTimer();
 
