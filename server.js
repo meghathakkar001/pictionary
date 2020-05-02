@@ -171,13 +171,14 @@ function newWord() {
 
 var wordcount;
 var whoisdrawing;
+var drawWord;
 io.on('connection', function (socket) {
 
 	io.emit('userlist', users);
 
 	socket.on('join', function (name) {
 		socket.username = name;
-
+		
 		// user automatically joins a room under their own name
 		socket.join(name);
 		console.log(socket.username + ' has joined. ID: ' + socket.id);
@@ -197,9 +198,9 @@ io.on('connection', function (socket) {
 			// server submits the 'drawer' event to this user
 			io.in(socket.username).emit('drawer', socket.username);
 			console.log(socket.username + ' is a drawer');
-
+			drawWord = newWord();
 			// send the random word to the user inside the 'drawer' room
-			io.in(socket.username).emit('draw word', newWord());
+			io.in(socket.username).emit('draw word', drawWord);
 			//	console.log(socket.username + "'s draw word (join event): " + newWord());
 			whoisdrawing = name;
 		}
@@ -211,6 +212,7 @@ io.on('connection', function (socket) {
 			// additional users will join the 'guesser' room
 			socket.join('guesser');
 			socket.join('new guesser');
+			io.in(socket.username).emit('guess word', drawWord.replace(/\D/g,"*"));
 			game.updateGuessers();
 
 
@@ -343,9 +345,10 @@ io.on('connection', function (socket) {
 
 		// submit 'drawer' event to the same user
 		io.in('drawer').emit('drawer', username);
-
+		drawWord = newWord()
 		// send a random word to the user connected to 'drawer' room
-		io.in('drawer').emit('draw word', newWord());
+		io.in('drawer').emit('draw word', drawWord);
+		io.in('guesser').emit('guess word', drawWord.replace(/\D/g,"*"));
 		io.emit('whoisdrawing', username);
 		resetTimer();
 

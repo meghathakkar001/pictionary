@@ -17,7 +17,7 @@
 
 
 <div class="grey-out hidden">
-    <form class="user"><label for="username">Enter a nickname </label><input id="username" type="text" placeholder="Bob Ross" maxlength="14" autofocus>
+    <form class="user"><label for="username">Enter a nickname </label><input autocomplete="off" id="username" type="text" placeholder="Bob Ross" maxlength="14" autofocus>
     <button type="submit" id="submitname">Submit</button>
     </form>
 </div>
@@ -25,28 +25,26 @@
 <div id="main">
     <h1>Pictionary</h1>
         <div class="row">
-            
-            <canvas id="canvas"></canvas><div class="users"><ul></ul>
-            <div class="draw-buttons">
-                <button value="0" class="clear" type="button">X</button>
-				<input type="text" class="inp" id="colorPicker"  value="#000000">
-                <div class="palette" id="colorPalette"></div>
-				</div>
-                <div id="counter"></div>
-                <div><p>The drawer name is: <span class="drawername"></span></p></div>
+            <div><span class="textToPrint"></span>Timer: <span id="counter"></span><span class="textToPrint">Drawer: </span><span class="drawername"></span> <span class="textToPrint">Word: </span><span id="guessword"></span ><span class="word" id="draw"></span></div>  
+            <div>
+            <div class="drawboard">
+                <canvas id="canvas"></canvas>
+                <div class="draw-buttons">
+                    <span class="textToPrint">Clear: </span><button value="0" class="clear" type="button">X</button>
+                    <span class="textToPrint">Select color to draw: </span><input type="color" id="colorPicker" value="black">
+                    <!--<input type="text" class="inp" id="colorPicker"  value="#000000">
+                    <div class="palette" id="colorPalette"></div>-->
+                </div>
+            </div>
+            <div class="users"><ul></ul>    
              <div id="guesses" class="chat"></div>
+             <form id="guess" class="hidden" >
+                <input name="guess" placeholder="Guess the word!" class="guess-input" type="text" autocomplete="off">
+            </form>
         </div>
         
 
   <script src="la_color_picker.js"></script>
         
-    </div>
-    <div id="top-message">
-        <div class="draw hidden" >
-            <p>The secret word is: <span class="word"></span></p>
-        </div>
-        <form id="guess" class="hidden" >
-            Guess the word! <input name="guess" class="guess-input" type="text">
-        </form> 
     </div>
 </div>

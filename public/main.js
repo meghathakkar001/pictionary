@@ -41,10 +41,11 @@ var guesser = function () {
     clearScreen();
     click = false;
     console.log('draw status: ' + click);
-    $('.draw').hide();
+    $('#draw').hide();
     //$('#guesses').empty();
     console.log('You are a guesser');
     $('#guess').show();
+    $('#guessword').show();
     $('.guess-input').focus();
 
     $('#guess').on('submit', function () {
@@ -75,6 +76,10 @@ var guessword = function (data) {
 var drawWord = function (word) {
     $('span.word').text(word);
     console.log('Your word to draw is: ' + word);
+};
+
+var guessWord = function (word) {
+    $('#guessword').text(word);
 };
 
 var users = [];
@@ -160,8 +165,8 @@ var pictionary = function (name) {
     console.log('draw status: ' + click);
     $('#guess').hide();
     //$('#guesses').empty();
-    $('.draw').show();
-
+    $('#draw').show();
+    $('#guessword').hide();
     var drawing;
     var color;
     var obj = {};
@@ -297,6 +302,7 @@ $(document).ready(function () {
     socket.on('draw', draw);
     socket.on('stopDraw', stopDraw);
     socket.on('draw word', drawWord);
+    socket.on('guess word',guessWord);
     socket.on('drawer', pictionary);
     socket.on('correct answer', correctAnswer);
     socket.on('clear screen', clearScreen);
