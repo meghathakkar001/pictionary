@@ -14,7 +14,7 @@ var countdown;
 var game = initGame();
 
 function initGame(drawerName) {
-	const rounds=3;
+	const rounds=1;
 	var currentRound=1;
 	
 	var drawer = drawerName;
@@ -33,7 +33,6 @@ function initGame(drawerName) {
 		console.log("addDrawer called with: %s", drawerName);
 		drawer = drawerName;
 		usersAlreadyDrawn.push(drawerName);
-		resetTimer();
 	}
 	nextDrawer = function () {
 		let drawerName = null;
@@ -127,24 +126,43 @@ function calculateScore(){
 	return Math.round(100*countdown/60);
 }
 
-setInterval(function() {
-	if(countdown==0) {
-			console.log("inside timer about to swap rooms");
-			let oldDrawer=game.getDrawer();
-			let nextDrawer= game.nextDrawer();
-			if(nextDrawer!=null){
-				swapRooms({ from: oldDrawer, to: nextDrawer });
-				}else{
-					//TODO: emit that new game is starting, display current scores
-					game = initGame(users[0].name);
-					swapRooms({ from: oldDrawer, to: game.getDrawer() });
+var setDrawingInterval= function(){
+	return setInterval(function() {
+		if(countdown==0) {
+				console.log("inside timer about to swap rooms");
+				let oldDrawer=game.getDrawer();
+				let nextDrawer= game.nextDrawer();
+				if(nextDrawer!=null){
+					swapRooms({ from: oldDrawer, to: nextDrawer });
+					}else{
+						var interval=handleBanner();
+						game = initGame(users[0].name);
+						swapRooms({ from: oldDrawer, to: game.getDrawer() });
+	
+					}
+			} else {
+				countdown--;
+				  io.emit('timer', { countdown: countdown });
+			}
+	}, 1000);
+}
 
-				}
-		} else {
-			countdown--;
-		  	io.emit('timer', { countdown: countdown });
-		}
-}, 1000);
+var drawingInterval=setDrawingInterval();
+handleBanner=function(){
+	let bannerdata={
+		users: users,
+		bannerTitle: "Final Scores\n, Starting new round in 10 seconds",
+		bannerCountDown: "10"
+	}
+	clearInterval(drawingInterval);
+	io.emit('show banner',bannerdata);
+	let bannerCountDown=10;
+	setTimeout(function(){
+			io.emit('hide banner');
+			drawingInterval=setDrawingInterval();
+
+	},10000);
+}
 
 
 var words = [
@@ -192,6 +210,7 @@ io.on('connection', function (socket) {
 
 			// place user into 'drawer' room
 			socket.join('drawer');
+			resetTimer();
 			game.addDrawer(socket.username);
 			console.log('Drawer is '+game.getDrawer());
 
@@ -280,7 +299,7 @@ io.on('connection', function (socket) {
 				if(nextDrawer!=null){
 				swapRooms({ from: oldDrawer, to: nextDrawer });
 				}else{
-					//TODO: emit that new game is starting, display current scores
+					handleBanner();
 					game = initGame(users[0].name);
 					io.emit('userlist',users);
 					swapRooms({ from: oldDrawer, to: game.getDrawer() });

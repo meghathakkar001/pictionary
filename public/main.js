@@ -135,6 +135,29 @@ var whoisdrawing = function (name) {
     $('#guesses').html($('#guesses').html() + '<p>' + name + ' is the new drawer' + '</p>');
 }
 
+var showBanner = function (bannerData) {
+    let bannerUsers=bannerData.users;
+    let counter=bannerData.bannerCountDown;
+    let bannerTitle=bannerData.bannerTitle;
+
+    $('.banner-title').html(bannerTitle);
+    bannerUsers.sort(function(a, b){return b.score - a.score});
+    let html="";
+    for (var i = 0; i < bannerUsers.length; i++) {
+        html += '<li id="' + bannerUsers[i].name + '">' + bannerUsers[i].name + ':' + bannerUsers[i].score + '</li>';
+    };
+    $('.banner-body').html(html);
+    $('.banner-grey-out').fadeIn(200);
+    $('.banner').fadeIn(200);
+    $('.banner-title').fadeIn(200);
+    $('.banner-body').fadeIn(200);
+}
+
+var hideBanner = function(){
+    
+    $('.banner-grey-out').fadeOut(200);
+}
+
 var getCanvas = function () {
     console.log("Received getCanvas, returning: " + context);
     socket.emit('send canvas', { 'drawerCanvas': document.getElementById('canvas').toDataURL() });
@@ -309,6 +332,8 @@ $(document).ready(function () {
     socket.on('send canvas', getCanvas);
     socket.on('init canvas', initCanvas);
     socket.on('whoisdrawing', whoisdrawing);
+    socket.on('show banner', showBanner);
+    socket.on('hide banner', hideBanner);
     socket.on('timer', function (data) {
         $('#counter').html(data.countdown);
     });
