@@ -133,10 +133,12 @@ var setDrawingInterval= function(){
 				let oldDrawer=game.getDrawer();
 				let nextDrawer= game.nextDrawer();
 				if(nextDrawer!=null){
+					io.emit('wasDrawing',{username: oldDrawer, drawWord: currentWord});
 					swapRooms({ from: oldDrawer, to: nextDrawer });
 					}else{
 						var interval=handleBanner();
 						game = initGame(users[0].name);
+						io.emit('wasDrawing',{username: oldDrawer, drawWord: currentWord});
 						swapRooms({ from: oldDrawer, to: game.getDrawer() });
 	
 					}
@@ -297,11 +299,13 @@ io.on('connection', function (socket) {
 			if (everyoneGuessed) {
 				nextDrawer= game.nextDrawer();
 				if(nextDrawer!=null){
-				swapRooms({ from: oldDrawer, to: nextDrawer });
+					io.emit('wasDrawing',{username: oldDrawer, drawWord: currentWord});
+					swapRooms({ from: oldDrawer, to: nextDrawer });					
 				}else{
 					handleBanner();
 					game = initGame(users[0].name);
 					io.emit('userlist',users);
+					io.emit('wasDrawing',{username: oldDrawer, drawWord: currentWord});
 					swapRooms({ from: oldDrawer, to: game.getDrawer() });
 
 				}

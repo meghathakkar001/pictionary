@@ -78,8 +78,17 @@ var drawWord = function (word) {
     console.log('Your word to draw is: ' + word);
 };
 
-var guessWord = function (word) {
+var toBeGuessedWord = function (word) {
     $('#guessword').text(word);
+};
+
+var wasDrawing = function(data) {
+    $('#guesses').html($('#guesses').html() + '<p><b>' + data.username + " was drawing:</b> " + data.drawWord);
+
+    var container = $('#guesses')[0];
+    var containerHeight = container.clientHeight;
+    var contentHeight = container.scrollHeight;
+    container.scrollTop = contentHeight - containerHeight;
 };
 
 var users = [];
@@ -330,7 +339,7 @@ $(document).ready(function () {
     socket.on('draw', draw);
     socket.on('stopDraw', stopDraw);
     socket.on('draw word', drawWord);
-    socket.on('guess word',guessWord);
+    socket.on('guess word',toBeGuessedWord);
     socket.on('drawer', pictionary);
     socket.on('correct answer', correctAnswer);
     socket.on('clear screen', clearScreen);
@@ -342,6 +351,7 @@ $(document).ready(function () {
     socket.on('timer', function (data) {
         $('#counter').html(data.countdown);
     });
+    socket.on('wasDrawing', wasDrawing);
 
 
 })
