@@ -82,6 +82,10 @@ var toBeGuessedWord = function (word) {
     $('#guessword').text(word);
 };
 
+var showLanguage = function(language) {
+    $('#language').text(language);
+}
+
 var wasDrawing = function(data) {
     $('#guesses').html($('#guesses').html() + '<p><b>' + data.username + " was drawing:</b> " + data.drawWord);
 
@@ -352,7 +356,7 @@ $(document).ready(function () {
         $('#counter').html(data.countdown);
     });
     socket.on('wasDrawing', wasDrawing);
-
+    socket.on('language', showLanguage);
 
 })
     ;

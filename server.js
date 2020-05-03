@@ -1,4 +1,5 @@
 var http = require('http');
+var gujarati= require('./gujaratiHandling.js');
 var express = require('express');
 var socket_io = require('socket.io');
 
@@ -12,7 +13,7 @@ var users = [];
 var currentWord;
 var countdown;
 var game = initGame();
-
+var language = "Gujarati";
 function initGame(drawerName) {
 	const rounds=3;
 	var currentRound=1;
@@ -165,23 +166,33 @@ handleBanner=function(){
 
 	},10000);
 }
-
-
-var words = [
+if(language==="Gujarati"){
+	
+	var words = [
+	"ગુજરાત","ભારત","સિંહ","પોપટ", "વડ", "ભીંડા", "દૂધી", "બકરી", "મોર", "જંગલ", "ઘર",
+	"વાઘ", "કેરી", "રોટલી", "બંદૂક", "ચાવી", "ઘેટા", "ચોપડી", "ચોટલી", "રાજા", "મસાલા", "ભાત", "ચમચી",
+	"રંગ", "ગરબા","વૃક્ષ" ,"તડબૂજ" , "કેડિયું", "ચણિયા ચોળી","વાદળ", "સૂરજ", "ગુલાબ", "ગુલાબ જાંબુ", "જલેબી",
+	"ચંદ્રમુખી", "કાચબો","ચામાચીડિયું", "ચા", "કોફી", "સંડાસ", "કાન", "છુંદો", "ચંપલ", "સાડી", "દુખ", "ખુશ", "ખુરસી",
+	"છાપુ", "છોકરી", "છોકરો", "માતા", "પિતા", "વડકો", "ભગવાન", "રામ", "મંદિર", "નરસિંહ મહેતા", "મેરા બાઈ",
+	"પગથિયા", "શાળા", "નખ", "બુટ્ટી", "પલંગ", "પતંગ", "ષટ્કોણ" ]
+	/*"કખગઘચછજઝટઠડઢળતથદધનપફબભમયરલવશષસહક્ષત્રજ્ઞ" */
+} else {
+	var words = [
 	"word", "letter", "number", "person", "pen", "police", "people",
 	"sound", "water", "breakfast", "place", "man", "men", "woman", "women", "boy",
-	"girl", "serial killer", "Oregon Trail", "week", "month", "name", "sentence", "line", "air",
+	"girl", "serial killer", "week", "month", "name", "sentence", "line", "air",
 	"land", "home", "hand", "house", "picture", "animal", "mother", "father",
 	"big foot", "sister", "world", "head", "page", "country", "question",
-	"shiba inu", "school", "plant", "food", "sun", "state", "eye", "city", "tree",
+	"school", "plant", "food", "sun", "state", "eye", "city", "tree",
 	"farm", "story", "sea", "night", "day", "life", "north", "south", "east",
 	"west", "child", "children", "example", "paper", "music", "river", "car", "feet", "book", "science", "room", "friend", "idea", "fish",
 	"mountain", "horse", "watch", "color", "face", "wood", "list", "bird",
 	"body", "fart", "family", "song", "door", "forest", "wind", "ship", "area",
 	"rock", "Captain Planet", "fire", "problem", "airplane", "top", "bottom", "king",
-	"space", "whale", "unicorn", "narwhal", "furniture", "sunset", "sunburn", "feather", "pigeon",
+	"space", "whale", "unicorn", "furniture", "sunset", "sunburn", "feather", "pigeon",
 	"Angel", "Eyeball", "Pizza", "Angry", "Fireworks", "Pumpkin", "Baby", "Flower", "Rainbow", "Beard", "Flying saucer", "Recycle", "Bible", "Giraffe", "Sand castle", "Bikini", "Glasses", "Snowflake", "Book", "High heel", "Stairs", "Bucket", "Ice cream cone", "Starfish", "Bumble bee", "Igloo", "Strawberry", "Butterfly", "Lady bug", "Sun", "Camera", "Lamp", "Tire", "Cat", "Lion", "Toast", "Church", "Mailbox", "Toothbrush", "Crayon", "Night", "Toothpaste", "Dolphin", "Nose", "Truck", "Egg", "Olympics", "Volleyball", "Eiffel Tower", "Peanut"
 ];
+}
 
 function newWord() {
 	wordcount = Math.floor(Math.random() * (words.length));
@@ -197,6 +208,7 @@ io.on('connection', function (socket) {
 	io.emit('userlist', users);
 
 	socket.on('join', function (name) {
+		io.emit('language', language);
 		socket.username = name;
 		
 		// user automatically joins a room under their own name
@@ -233,7 +245,16 @@ io.on('connection', function (socket) {
 			// additional users will join the 'guesser' room
 			socket.join('guesser');
 			socket.join('new guesser');
-			io.in(socket.username).emit('guess word', drawWord.replace(/\S/g,"*"));
+			if(language==="Gujarati") {
+				let maskedGujString=gujarati.encodeGujaratiWord(drawWord);
+				
+				io.in(socket.username).emit('guess word', maskedGujString);
+
+			
+			} else {
+				io.in(socket.username).emit('guess word', drawWord.replace(/\S/g,"*"));
+			}
+			
 			game.updateGuessers();
 
 
@@ -279,7 +300,7 @@ io.on('connection', function (socket) {
 		var guessToPrint = data.guessword;
 		console.log('guessword event triggered on server from: ' + data.username + ' with word: ' + data.guessword);
 
-		if (currentWord.toString().toLowerCase() === data.guessword.toString().toLowerCase()) {
+		if (currentWord.toString().trim().toLowerCase() === data.guessword.toString().trim().toLowerCase()) {
 			console.log('guesser: ' + data.username + ' draw-word: ' + data.guessword.toString());
 			
 
@@ -364,14 +385,21 @@ io.on('connection', function (socket) {
 		}
 		game.addDrawer(username);
 		console.log('Drawer is '+game.getDrawer());
-		console.log('new drawer emit: ' + username);
+		
 
 		// submit 'drawer' event to the same user
 		io.in('drawer').emit('drawer', username);
 		drawWord = newWord()
+		console.log('new drawer emit: ' + username+" draw word: "+drawWord);
 		// send a random word to the user connected to 'drawer' room
 		io.in('drawer').emit('draw word', drawWord);
-		io.in('guesser').emit('guess word', drawWord.replace(/\S/g,"*"));
+		if(language==="Gujarati") {
+			let maskedGujString=gujarati.encodeGujaratiWord(drawWord);
+			io.in('guesser').emit('guess word', maskedGujString);
+
+		} else {
+			io.in('guesser').emit('guess word', drawWord.replace(/\S/g,"*"));
+		}
 		io.emit('whoisdrawing', username);
 		resetTimer();
 
@@ -382,7 +410,7 @@ io.on('connection', function (socket) {
 	});
 
 	swapRooms = function (data) {
-
+		io.emit('clear screen');
 		// drawer leaves 'drawer' room and joins 'guesser' room
 		console.log("swap rooms: from: %s, to: %s", data.from, data.to);
 		var socketList = io.sockets.sockets;

@@ -1,0 +1,10 @@
+
+<input type="text" id="character" onchange="encoding()"/>
+<div id="show"></div>
+
+<script>
+    function encoding() {
+    let result = encodeURIComponent(document.getElementById('character').value);
+    document.getElementById('show').innerHTML = result;
+}
+</script>
